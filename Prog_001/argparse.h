@@ -120,9 +120,11 @@ namespace argparse {
 		unsigned short arguments_count;
 		unsigned short positional_count;
 		unsigned short optional_count;
+		size_t _max_arg_name_len;
 		int _argc;
 		std::string exec_name;
 		std::string description;
+		std::string author;
 		char os_sep;
 		std::vector<std::string> raw_arguments;
 		std::vector<std::string> sanitized_arguments;
@@ -139,9 +141,11 @@ namespace argparse {
 		void _sanitize_arguments_vector();
 		void _convert_arguments();
 	public:
-		ArgumentParser(const std::string & description, const std::string & app_name);
+		ArgumentParser(const std::string & description, const std::string & app_name, const std::string & author);
 		ArgumentParser();
 		~ArgumentParser();
+
+		bool parse_check_help(int argc, char * argv[]);
 
 		Error parse_args(int argc, char * argv[]);
 
@@ -170,6 +174,8 @@ namespace argparse {
 			ArgImportance arg_imp = ArgImportance::iPositional,
 			ArgSpecialBehavior arg_sb = ArgSpecialBehavior::None
 		);
+
+		std::ostringstream ret_help();
 
 	};
 

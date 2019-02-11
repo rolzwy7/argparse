@@ -20,13 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "argparse.h"
-#include<iostream>
+#include <iostream>
+#include <iomanip>
 
 
 namespace argparse {
 
 	void ArgumentParser::_init()
 	{
+		_max_arg_name_len = 0;
 		this->_argc = 1;
 		this->arguments_count = 0;
 		this->positional_count = 0;
@@ -206,9 +208,10 @@ namespace argparse {
 		}
 	}
 
-	ArgumentParser::ArgumentParser(const std::string & description, const std::string & app_name):
+	ArgumentParser::ArgumentParser(const std::string & description, const std::string & app_name, const std::string & author):
 		description(description),
-		exec_name(app_name)
+		exec_name(app_name),
+		author(author)
 	{
 		this->_init();
 	}
@@ -221,6 +224,19 @@ namespace argparse {
 
 	ArgumentParser::~ArgumentParser()
 	{
+	}
+
+	bool ArgumentParser::parse_check_help(int argc, char * argv[]) {
+		std::string help[2] = {"--help", "/?"};
+		std::string temp("");
+		for (int i = 0; i < argc; ++i) {
+			temp = argv[i];
+			for (int j = 0; j < 2; ++j) {
+				if (temp == help[j])
+					return true;
+			}
+		}
+		return false;
 	}
 
 	void ArgumentParser::add_argument(std::string arg_name, std::string arg_help, ArgType arg_type, ArgImportance arg_imp, ArgSpecialBehavior arg_sb)
@@ -236,6 +252,8 @@ namespace argparse {
 			this->_arguments[arg_name] = ArgConfig(arg_name, arg_help, arg_type, arg_imp, arg_sb, -1);
 		}
 		this->arguments_count++;
+		if (_max_arg_name_len < (arg_name.length() * 2) + 4 + 3)
+			_max_arg_name_len = (arg_name.length() * 2) + 4 + 3;
 	}
 
 	Error ArgumentParser::parse_args(int argc, char * argv[]) {
@@ -307,6 +325,65 @@ namespace argparse {
 		code(NO_ERROR),
 		msg("")
 	{
+	}
+
+
+	std::ostringstream ArgumentParser::ret_help() {
+		std::ostringstream oss;
+		auto upper = [](ArgConfig arg)->std::string {
+			std::string upper = arg.arg_name;
+			if (arg.arg_type == ArgType::tStoreTrue || arg.arg_type == ArgType::tStoreFalse) {
+				return "";
+			}
+			for (auto it = upper.begin(); it != upper.end(); ++it) {
+				*it = ::toupper(*it);
+			}
+			return upper;
+		};
+
+		std::string optional_args_usage = "";
+		std::string positional_args_usage = "";
+
+		for(auto it=_arguments.begin(); it != _arguments.end(); ++it) {
+			if (it->second.arg_imp == ArgImportance::iOptional) {
+				optional_args_usage += "[-" + it->second.arg_name + "] ";
+			}
+			if (it->second.arg_imp == ArgImportance::iPositional) {
+				positional_args_usage += it->second.arg_name + " ";
+			}
+
+		}
+
+		oss << "usage: " << exec_name << " ";
+		oss << positional_args_usage << std::endl;
+		oss << optional_args_usage << std::endl;
+		oss << std::endl;
+		oss << " Author      : " << author << std::endl;
+		oss << " Description : " << description << std::endl;
+
+		oss << std::endl << "positional arguments:" << std::endl;
+		for (auto it = _arguments.begin(); it != _arguments.end(); ++it) {
+
+			if (it->second.arg_imp == ArgImportance::iPositional) {
+				oss << std::left << std::setfill(' ') << std::setw(_max_arg_name_len)
+					<< "  " + it->second.arg_name
+					<< it->second.arg_help << std::endl;
+			}
+
+		}
+		oss << std::endl;
+		oss << "optional arguments:" << std::endl;
+		for (auto it = _arguments.begin(); it != _arguments.end(); ++it) {
+			if (it->second.arg_imp == ArgImportance::iOptional) {
+				optional_args_usage = it->second.arg_name;
+
+				oss << std::left << std::setfill(' ') << std::setw(_max_arg_name_len)
+					<< "  -" + it->second.arg_name + " " + upper(it->second)
+					<< it->second.arg_help << std::endl;
+
+			}
+		}
+		return oss;
 	}
 
 } // argparse
