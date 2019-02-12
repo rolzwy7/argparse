@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{007F3CBC-62E1-48FF-950E-F55ADB2AABCA}</ProjectGuid>
+    <ProjectGuid>{5E735F95-AAAC-44BB-A98F-2A989E4F7189}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Prog001</RootNamespace>
+    <RootNamespace>argparse</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -151,11 +151,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="argparse.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="argparse.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="argparse.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

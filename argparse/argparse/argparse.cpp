@@ -23,7 +23,6 @@
 #include <iostream>
 #include <iomanip>
 
-
 namespace argparse {
 
 	void ArgumentParser::_init()
@@ -143,12 +142,12 @@ namespace argparse {
 	{
 		auto get_err_msg = [](ArgConfig obj)->std::string {
 			std::string ret = "Can't convert argument '" + obj.arg_name + "' to ";
+			if (obj.arg_type == ArgType::tInt)
+				ret += "int";
 			if (obj.arg_type == ArgType::tFloat)
 				ret += "float";
 			if (obj.arg_type == ArgType::tDouble)
 				ret += "double";
-			if (obj.arg_type == ArgType::tDouble)
-				ret += "int";
 			ret += " | provided value: " + obj.arg_str_value;
 			return ret;
 		};
@@ -158,6 +157,17 @@ namespace argparse {
 				// String
 				if (it->second.arg_type == ArgType::tString) {
 					_arg_map_string[it->first] = it->second.arg_str_value;
+					continue;
+				}
+				// Integer
+				if (it->second.arg_type == ArgType::tInt) {
+					std::cmatch m;
+					if (!std::regex_match(it->second.arg_str_value.c_str(), m, re_int))
+						throw Error(CONVERT_ARG_ERROR, get_err_msg(it->second).c_str());
+					std::istringstream iss(it->second.arg_str_value);
+					int temp;
+					iss >> temp;
+					_arg_map_int[it->first] = temp;
 					continue;
 				}
 				// Float
